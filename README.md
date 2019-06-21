@@ -59,6 +59,6 @@ cdd pro # will go to reallycoolproject/pro
 
 No known bugs. If you find one, please go to https://github.com/vjacynycz-stratio/bettercd/issues
 
-# Athor 
+# Author 
 
 Viktor Jacynycz (viktor@jacynycz.es) - Contact viktor@jacynycz.es to correct errors or typos.
