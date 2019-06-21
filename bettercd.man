@@ -1,0 +1,55 @@
+.\" Manpage for better cd.
+.\" Contact viktor@jacynycz.es to correct errors or typos.
+.TH man 8 "06 May 2010" "1.0" "better cd man page"
+.SH NAME
+cd \- Change the shell working directory.
+.SH SYNOPSIS
+cd DIR
+.br
+cd PATTERN [PATTERN | PATTERN ...]
+.br
+cdd PATTERN [PATTERN | PATTERN ...]
+.SH DESCRIPTION
+Change the current directory to DIR.  The default DIR is the value of the HOME shell variable.
+
+Better cd allows to use patterns to jump into long paths.
+
+Given the following structure:
+.br
+.RS 4
+/home/vik/projects/reallycoolproject
+.br
+/home/vik/projects/niceproject
+.RE
+
+cd proj rea # will go to reallycoolproject
+.br
+cd p ni # will go to niceproject
+.br
+cd pro # will go to projects/
+.br
+cd pr pro # will go to niceproject
+
+cdd works similar to cd but instead of calculating the jump over the BETTERCDROOT var uses the current directory.
+
+
+Given the following structure:
+.br
+.RS 4
+/home/vik/projects/reallycoolproject/pro/vars
+.br
+/home/vik/projects/reallycoolproject/pro/bin
+.br
+/home/vik/projects/niceproject
+.RE
+
+And if PWD=/home/vik/projects/reallycoolproject
+
+cd pro # will go to projects/
+.br
+cdd pro # will go to reallycoolproject/pro/
+
+.SH BUGS
+No known bugs. If you find one, please go to https://github.com/vjacynycz-stratio/bettercd/issues
+.SH AUTHOR
+Viktor Jacynycz (viktor@jacynycz.es)

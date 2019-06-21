@@ -1,0 +1,88 @@
+export BETTERCDROOT=$HOME
+export BETTERCDVERBOSE=0
+export BETTERCDCACHE=$HOME/.bettercd/bettercd.cache
+
+function cd () {
+	WC="[a-zA-Z\-]*"
+	EXPR="$WC"
+	
+	if [[ -z $1 ]]; then
+		if [[ $BETTERCDVERBOSE -eq 1 ]]; then
+			echo "cd to $HOME"
+		fi
+		builtin cd $HOME
+	elif [[ $1 == "-h" ]]; then
+		man $HOME/.bettercd/bettercd.man
+	elif [[ $1 == "--cache" ]]; then
+		echo "Regenerating bettercd cache"
+		find $HOME -type d 2>/dev/null > $HOME/.bettercd/bettercd.cache
+	else
+	    builtin cd $1 2>/dev/null
+		if [ $? -eq 0 ]; then
+			if [[ $BETTERCDVERBOSE -eq 1 ]]; then
+				echo "cd to $PWD"
+			fi
+		else
+			if [[ -f $BETTERCDCACHE ]]; then
+				for T in $@
+				do
+					EXPR+="$T$WC\/$WC"
+				done
+				L=$(echo ${EXPR} | wc -c)-14
+				EXPR=${EXPR:0:$L}
+				DIR=$(grep -i "$EXPR" "$BETTERCDCACHE" | awk '{ print length($0) " " $0; }' $file | sort  -n | cut -d ' ' -f 2- | head -1)
+				if [[ $BETTERCDVERBOSE -eq 1 ]]; then
+					echo "better cd to $DIR"
+				fi
+				builtin cd $DIR
+			else
+				echo "bettercd cache not found"
+				echo "please run $HOME/.bettercd/install.sh"
+			fi
+			
+		fi
+	fi
+}
+
+function cdd () {
+	WC="[a-zA-Z\-]*"
+	EXPR="$WC"
+	CACHE=$HOME/.bettercd/bettercd.cache
+	if [[ -z $1 ]]; then
+		
+		if [[ $BETTERCDVERBOSE -eq 1 ]]; then
+			echo "cd to $HOME"
+		fi
+		builtin cd $HOME
+
+	elif [[ $1 == "-h" ]]; then
+
+		man $HOME/.bettercd/bettercd.man
+
+	elif [[ $1 == "--cache" ]]; then
+
+		echo "Regenerating bettercd cache"
+		find $HOME -type d 2>/dev/null > $HOME/.bettercd/bettercd.cache
+
+	else
+	  
+		if [[ -f $BETTERCDCACHE ]]; then
+			for T in $@
+			do
+				EXPR+="$T$WC\/$WC"
+			done
+			L=$(echo ${EXPR} | wc -c)-14
+			EXPR=${EXPR:0:$L} 
+			DIR=$(grep -i $PWD $BETTERCDCACHE | grep -i "$EXPR" | awk '{ print length($0) " " $0; }' $file | sort  -n | cut -d ' ' -f 2- | head -1)
+			if [[ $BETTERCDVERBOSE -eq 1 ]]; then
+				echo "better cd to $DIR"
+			fi
+			builtin cd $DIR
+		else
+			echo "bettercd cache not found"
+			echo "please run $HOME/.bettercd/install.sh"
+		fi
+			
+		
+	fi
+}
