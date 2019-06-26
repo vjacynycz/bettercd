@@ -11,12 +11,36 @@ function cd () {
 			echo "cd to $HOME"
 		fi
 		builtin cd $HOME
+
 	elif [[ $1 == "-h" ]]; then
 		man $HOME/.bettercd/bettercd.man
+
 	elif [[ $1 == "--cache" ]]; then
 		echo "Regenerating bettercd cache"
 		find $HOME -type d 2>/dev/null > $HOME/.bettercd/bettercd.cache
-	else
+
+	elif [[ $1 == "--updateroot" ]]; then
+		if [[ ! -z $2 ]]; then
+			#sed -i 's/export BETTERCDROOT\=.*/export BETTERCDROOT\=\$HOME/g' $HOME/.bettercd/bettercd.source
+			if [[ -d $2 ]]; then
+			 	echo "Updating bettercd root DIR to $2"
+			 	export BETTERCDROOT=$HOME
+			 	sed -i 's/export BETTERCDROOT\=.*/export BETTERCDROOT\=\$HOME/g' $HOME/.bettercd/bettercd.source
+				echo "Updating cache"
+			 	find $BETTERCDROOT -type d 2>/dev/null > $HOME/.bettercd/bettercd.cache
+			 	echo "Updating cronjob"
+			 	crontab -l | grep -v bettercd | crontab -
+			 	(crontab -l 2>/dev/null; echo "*/20 * * * * find $BETTERCDROOT -type d 2>/dev/null > $HOME/.bettercd/bettercd.cache") | crontab -
+			else
+				echo "Seems like $2 is not a directory"
+			fi 
+		else
+			echo "USAGE:"
+			echo
+			echo "cd --updateroot <DIR>"
+		fi
+
+	else # $1 is a DIR or a list of PATERN
 	    builtin cd $1 2>/dev/null
 		if [ $? -eq 0 ]; then
 			if [[ $BETTERCDVERBOSE -eq 1 ]]; then
