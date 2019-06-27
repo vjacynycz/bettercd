@@ -24,7 +24,7 @@ function cd () {
 			#sed -i 's/export BETTERCDROOT\=.*/export BETTERCDROOT\=\$HOME/g' $HOME/.bettercd/bettercd.source
 			if [[ -d $2 ]]; then
 			 	echo "Updating bettercd root DIR to $2"
-			 	export BETTERCDROOT=$HOME
+			 	export BETTERCDROOT=$2
 			 	sed -i 's/export BETTERCDROOT\=.*/export BETTERCDROOT\=\$HOME/g' $HOME/.bettercd/bettercd.source
 				echo "Updating cache"
 			 	find $BETTERCDROOT -type d 2>/dev/null > $HOME/.bettercd/bettercd.cache
