@@ -12,7 +12,7 @@ function cd () {
 		fi
 		builtin cd $HOME
 
-	elif [[ $1 == "-h" ]]; then
+	elif [[ $1 == "-h" ||  $1 == "--help" ]]; then
 		man $HOME/.bettercd/bettercd.man
 
 	elif [[ $1 == "--cache" ]]; then

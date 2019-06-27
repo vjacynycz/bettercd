@@ -9,6 +9,8 @@ cd DIR
 cd PATTERN [PATTERN | PATTERN ...]
 .br
 cdd PATTERN [PATTERN | PATTERN ...]
+.br
+cd [OPTIONS]
 .SH DESCRIPTION
 Change the current directory to DIR.  The default DIR is the value of the HOME shell variable.
 
@@ -17,7 +19,7 @@ Better cd allows to use patterns to jump into long paths.
 Given the following structure:
 .br
 .RS 4
-/home/vik/projects/reallycoolproject
+/home/vik/projects/reallycoolproject"
 .br
 /home/vik/projects/niceproject
 .RE
@@ -48,8 +50,31 @@ And if PWD=/home/vik/projects/reallycoolproject
 cd pro # will go to projects/
 .br
 cdd pro # will go to reallycoolproject/pro/
+.SH OPTIONS
+.RS 2
+--cache
+.RE
 
+.RS 6
+Reloads better cd cache.
+.RE
+
+.RS 2
+--uptadateroot DIR
+.RE
+
+.RS 6
+Updates the root directory from which better cd calculates jumps. Default directory is $HOME (cd --updateroot $HOME).
+.RE
+
+.RS 2
+--help|-h
+.RE
+
+.RS 6
+Show this man page
+.RE
 .SH BUGS
-No known bugs. If you find one, please go to https://github.com/vjacynycz-stratio/bettercd/issues
+No known bugs. If you find one, please go to https://github.com...
 .SH AUTHOR
 Viktor Jacynycz (viktor@jacynycz.es)

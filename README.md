@@ -51,10 +51,12 @@ cd pro # will go to projects
 cdd pro # will go to reallycoolproject/pro
 ```
 
-# TODOs
+# Command line options
 
-1. Change $BETTERCD root via command line.
-2. TBD.
+- `--updateroot`: Updates the root directory from which better cd calculates jumps. Default directory is `$HOME` (to restore default location run `cd --updateroot $HOME`).
+- `--cache`: Updates the cache file, this is usefull if you want to be able to jump inside directories you just created.
+- `--help|-h`: Show bettercd man page.
+
 # Bugs
 
 No known bugs. If you find one, please go to https://github.com/vjacynycz-stratio/bettercd/issues
