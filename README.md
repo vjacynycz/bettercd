@@ -13,11 +13,28 @@ Run `./install.sh`.
 
 # Usage
 
-cd DIR *#default behaviour*
+Default cd behaviour
+```bash
+cd DIR
+```
 
-cd PATTERN [PATTERN | PATTERN ...] *#bettercd behaviour*
+Jump to a directory under `$BETTERCDROOT` matching *PATTERN* or each *PATTERN* separated by `/` (see <a href="#description">Description</a>).
+```bash
+cd PATTERN
+cd PATTERN [PATTERN] ... [PATTERN]
+```
 
-cdd PATTERN [PATTERN | PATTERN ...] *#bettercd behaviour*
+
+Jump to a directory under `$PWD` matching *PATTERN* or each *PATTERN* separated by `/` (see <a href="#description">Description</a>).  `cdd` only works if the current directory is under `$BETTERCDROOT`.
+```bash
+cdd PATTERN
+cdd PATTERN [PATTERN] ... [PATTERN]
+```
+
+List cache contents. Works similar to cd but it shows a list of possible jump locations (bettercd always chooses the first shown).
+```bash
+cl PATTERN [PATTERN] ... [PATTERN]
+``` 
 
 # Description
 

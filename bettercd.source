@@ -68,6 +68,35 @@ function cd () {
 	fi
 }
 
+function cl () {
+
+    WC="[a-zA-Z\-]*"
+	EXPR="$WC"
+
+	if [[ -z $1 ]]; then
+        echo "Usage: cl PATTERN [PATTERN] .. [PATTERN]"
+
+	elif [[ $1 == "-h" ||  $1 == "--help" ]]; then
+		man $HOME/.bettercd/bettercd.man
+
+	else # $1 is a DIR or a list of PATERN
+        if [[ -f $BETTERCDCACHE ]]; then
+            for T in $@
+            do
+                EXPR+="$T$WC\/$WC"
+            done
+            L=$(echo ${EXPR} | wc -c)-14
+            EXPR=${EXPR:0:$L}
+            grep -i "$EXPR" "$BETTERCDCACHE" | awk '{ print length($0) " " $0; }' $file | sort  -n | cut -d ' ' -f 2- | head -10
+
+        else
+            echo "bettercd cache not found"
+            echo "please run $HOME/.bettercd/install.sh"
+
+		fi
+	fi
+
+}
 function cdd () {
 	WC="[a-zA-Z\-]*"
 	EXPR="$WC"

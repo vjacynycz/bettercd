@@ -11,6 +11,8 @@ cd PATTERN [PATTERN | PATTERN ...]
 cdd PATTERN [PATTERN | PATTERN ...]
 .br
 cd [OPTIONS]
+.br
+cl PATTERN [PATTERN | PATTERN ...]
 .SH DESCRIPTION
 Change the current directory to DIR.  The default DIR is the value of the HOME shell variable.
 
