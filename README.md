@@ -1,5 +1,8 @@
-# bettercd
-Jump to directories using partial path names. It allows users to jump to long and complicated paths using a fraction of the directory names. Better cd also allows to concatenate fragments of a path (see examples bellow).
+[![GitHub Release](https://img.shields.io/github/release/vjacynycz-stratio/bettercd.svg)](https://github.com/vjacynycz-stratio/bettercd/releases)
+[![GitHub License](https://img.shields.io/github/license/vjacynycz-stratio/bettercd.svg)](https://github.com/vjacynycz-stratio/bettercd/blob/master/LICENSE)
+
+# bettercd - Jump to directories using partial path names
+Bettercd allows users to jump to long and complicated paths using a fraction of the directory names. Better cd also allows to concatenate fragments of a path (see examples bellow).
 
 # Installation
 
