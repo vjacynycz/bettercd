@@ -6,13 +6,12 @@ cd \- Change the shell working directory.
 .SH SYNOPSIS
 cd DIR
 .br
-cd PATTERN [PATTERN | PATTERN ...]
+cd PATTERN [PATTERN | PATTERN ...] [-l]
 .br
-cdd PATTERN [PATTERN | PATTERN ...]
+cdd PATTERN [PATTERN | PATTERN ...] [-l]
 .br
 cd [OPTIONS]
-.br
-cl PATTERN [PATTERN | PATTERN ...]
+
 .SH DESCRIPTION
 Change the current directory to DIR.  The default DIR is the value of the HOME shell variable.
 
@@ -76,6 +75,25 @@ Updates the root directory from which better cd calculates jumps. Default direct
 .RS 6
 Show this man page
 .RE
+
+
+.RS 2
+-l
+.RE
+
+.RS 6
+List cache contents. Works similar to cd but it shows a list of possible jump locations (bettercd always chooses the first shown).
+.RE
+
+
+.RS 2
+-|--
+.RE
+
+.RS 6
+Changes the working directory to the previous working directory.
+.RE
+
 .SH BUGS
 No known bugs. If you find one, please go to https://github.com...
 .SH AUTHOR

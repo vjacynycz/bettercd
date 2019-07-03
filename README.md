@@ -1,6 +1,6 @@
 [![GitHub Release](https://img.shields.io/github/release/vjacynycz-stratio/bettercd.svg)](https://github.com/vjacynycz-stratio/bettercd/releases)
 [![GitHub License](https://img.shields.io/github/license/vjacynycz-stratio/bettercd.svg)](https://github.com/vjacynycz-stratio/bettercd/blob/master/LICENSE)
-
+[![GitHub Maintainer](https://img.shields.io/badge/maintainer-vjacynycz--stratio-success.svg)](https://github.com/vjacynycz-stratio)
 # bettercd - Jump to directories using partial path names
 Bettercd allows users to jump to long and complicated paths using a fraction of the directory names. Better cd also allows to concatenate fragments of a path (see examples bellow).
 
@@ -33,11 +33,6 @@ Jump to a directory under `$PWD` matching *PATTERN* or each *PATTERN* separated 
 cdd PATTERN
 cdd PATTERN [PATTERN] ... [PATTERN]
 ```
-
-List cache contents. Works similar to cd but it shows a list of possible jump locations (bettercd always chooses the first shown).
-```bash
-cl PATTERN [PATTERN] ... [PATTERN]
-``` 
 
 # Description
 
@@ -76,6 +71,8 @@ cdd pro # will go to reallycoolproject/pro
 - `--updateroot`: Updates the root directory from which better cd calculates jumps. Default directory is `$HOME` (to restore default location run `cd --updateroot $HOME`).
 - `--cache`: Updates the cache file, this is usefull if you want to be able to jump inside directories you just created.
 - `--help|-h`: Show bettercd man page.
+- `-l`: List cache contents. Works similar to cd but it shows a list of possible jump locations (bettercd always chooses the first shown).
+- `-|--`: Changes the working directory to the previous working directory.
 
 # Bugs
 

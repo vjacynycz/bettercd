@@ -1,6 +1,19 @@
 export BETTERCDROOT=$HOME
 export BETTERCDVERBOSE=0
 export BETTERCDCACHE=$HOME/.bettercd/bettercd.cache
+export BETTERCDLWD=$HOME/.bettercd/bettercd.lwd
+
+function _bettercd_save_lwd(){
+	#Saves the last working directory to $BETTERCDLWD
+	echo $PWD > $BETTERCDLWD
+}
+
+function _bettercd_cd_tp_lwd(){
+	#Changes the working dir to the last working directory
+	LWD=$(cat $BETTERCDLWD)
+	_bettercd_save_lwd
+	builtin cd $LWD
+}
 
 function cd () {
 	WC="[a-zA-Z\-]*"
@@ -10,10 +23,14 @@ function cd () {
 		if [[ $BETTERCDVERBOSE -eq 1 ]]; then
 			echo "cd to $HOME"
 		fi
+		_bettercd_save_lwd
 		builtin cd $HOME
 
 	elif [[ $1 == "-h" ||  $1 == "--help" ]]; then
 		man $HOME/.bettercd/bettercd.man
+
+	elif [[ $1 == "-" ||  $1 == "--" ]]; then
+		_bettercd_cd_tp_lwd
 
 	elif [[ $1 == "--cache" ]]; then
 		echo "Regenerating bettercd cache"
@@ -41,6 +58,7 @@ function cd () {
 		fi
 
 	else # $1 is a DIR or a list of PATERN
+		_bettercd_save_lwd
 	    builtin cd $1 2>/dev/null
 		if [ $? -eq 0 ]; then
 			if [[ $BETTERCDVERBOSE -eq 1 ]]; then
@@ -48,17 +66,26 @@ function cd () {
 			fi
 		else
 			if [[ -f $BETTERCDCACHE ]]; then
+				BETTERLIST=0
 				for T in $@
 				do
-					EXPR+="$T$WC\/$WC"
+					if [[ $T == "-l" ]]; then
+						BETTERLIST=1
+					else
+						EXPR+="$T$WC\/$WC"
+					fi
 				done
 				L=$(echo ${EXPR} | wc -c)-14
 				EXPR=${EXPR:0:$L}
-				DIR=$(grep -i "$EXPR" "$BETTERCDCACHE" | awk '{ print length($0) " " $0; }' $file | sort  -n | cut -d ' ' -f 2- | head -1)
-				if [[ $BETTERCDVERBOSE -eq 1 ]]; then
-					echo "better cd to $DIR"
+				if [[ $BETTERLIST -eq 1 ]]; then
+					LISTCD=$(grep -i "$EXPR" "$BETTERCDCACHE" | awk '{ print length($0) " " $0; }' $file | sort  -n | cut -d ' ' -f 2- | head -10 | sed "s?$BETTERCDROOT?\\\e\[95m$BETTERCDROOT\\\e\[32m?g") && echo -e "\e[95mBETTERCDROOT:$BETTERCDROOT\n\n$LISTCD"
+				else
+					DIR=$(grep -i "$EXPR" "$BETTERCDCACHE" | awk '{ print length($0) " " $0; }' $file | sort  -n | cut -d ' ' -f 2- | head -1)
+					if [[ $BETTERCDVERBOSE -eq 1 ]]; then
+						echo "better cd to $DIR"
+					fi
+					builtin cd $DIR
 				fi
-				builtin cd $DIR
 			else
 				echo "bettercd cache not found"
 				echo "please run $HOME/.bettercd/install.sh"
@@ -68,35 +95,6 @@ function cd () {
 	fi
 }
 
-function cl () {
-
-    WC="[a-zA-Z\-]*"
-	EXPR="$WC"
-
-	if [[ -z $1 ]]; then
-        echo "Usage: cl PATTERN [PATTERN] .. [PATTERN]"
-
-	elif [[ $1 == "-h" ||  $1 == "--help" ]]; then
-		man $HOME/.bettercd/bettercd.man
-
-	else # $1 is a DIR or a list of PATERN
-        if [[ -f $BETTERCDCACHE ]]; then
-            for T in $@
-            do
-                EXPR+="$T$WC\/$WC"
-            done
-            L=$(echo ${EXPR} | wc -c)-14
-            EXPR=${EXPR:0:$L}
-            grep -i "$EXPR" "$BETTERCDCACHE" | awk '{ print length($0) " " $0; }' $file | sort  -n | cut -d ' ' -f 2- | head -10
-
-        else
-            echo "bettercd cache not found"
-            echo "please run $HOME/.bettercd/install.sh"
-
-		fi
-	fi
-
-}
 function cdd () {
 	WC="[a-zA-Z\-]*"
 	EXPR="$WC"
@@ -118,19 +116,35 @@ function cdd () {
 		find $HOME -type d 2>/dev/null > $HOME/.bettercd/bettercd.cache
 
 	else
-	  
 		if [[ -f $BETTERCDCACHE ]]; then
+			BETTERLIST=0
 			for T in $@
 			do
-				EXPR+="$T$WC\/$WC"
+				if [[ $T == "-l" ]]; then
+					BETTERLIST=1
+				else
+					EXPR+="$T$WC\/$WC"
+				fi
 			done
 			L=$(echo ${EXPR} | wc -c)-14
 			EXPR=${EXPR:0:$L} 
-			DIR=$(grep -i $PWD $BETTERCDCACHE | grep -i "$EXPR" | awk '{ print length($0) " " $0; }' $file | sort  -n | cut -d ' ' -f 2- | head -1)
+			DIR=$(grep -i $PWD/ $BETTERCDCACHE | grep -i "$EXPR" | awk '{ print length($0) " " $0; }' $file | sort  -n | cut -d ' ' -f 2- | head -1)
 			if [[ $BETTERCDVERBOSE -eq 1 ]]; then
 				echo "better cd to $DIR"
 			fi
-			builtin cd $DIR
+			if [[ $BETTERLIST -eq 1 ]]; then
+				LISTCDD=$(grep -i "$PWD/" $BETTERCDCACHE | grep -i "$EXPR" | awk '{ print length($0) " " $0; }' $file | sort  -n | cut -d ' ' -f 2- | head -10 | sed "s?$PWD?\\\e\[95m$PWD\\\e\[32m?g" |  sed "s?$BETTERCDROOT?$BETTERCDROOT\\\e\[96m?g") && echo -e "\e[96mPWD:$PWD\n\e[95mBETTERCDROOT:$BETTERCDROOT\n\n$LISTCDD"
+
+			else
+				if [[ ! -z $DIR ]]; then
+					builtin cd $DIR
+				else
+					if [[ $BETTERCDVERBOSE -eq 1 ]]; then
+						echo "No directory found to jump under $PWD"
+					fi
+				fi
+			fi
+			
 		else
 			echo "bettercd cache not found"
 			echo "please run $HOME/.bettercd/install.sh"
