@@ -1,43 +1,44 @@
-export BETTERCDROOT=$HOME
+#!/usr/bin/env bash
+
+export BETTERCDROOT=$HOME/projects
 export BETTERCDVERBOSE=0
 export BETTERCDCACHE=$HOME/.bettercd/bettercd.cache
 export BETTERCDLWD=$HOME/.bettercd/bettercd.lwd
 
 function _bettercd_save_lwd(){
 	#Saves the last working directory to $BETTERCDLWD
-	echo $PWD > $BETTERCDLWD
+	echo $PWD >> ${BETTERCDLWD}
 }
 
-function _bettercd_cd_tp_lwd(){
+function _bettercd_cd_to_lwd(){
 	#Changes the working dir to the last working directory
-	LWD=$(cat $BETTERCDLWD)
+	LWD=$(tail -1 ${BETTERCDLWD})
 	_bettercd_save_lwd
 	builtin cd $LWD
 }
 
-function cd () {
-	WC="[a-zA-Z\-]*"
-	EXPR="$WC"
-	
-	if [[ -z $1 ]]; then
-		if [[ $BETTERCDVERBOSE -eq 1 ]]; then
-			echo "cd to $HOME"
-		fi
-		_bettercd_save_lwd
-		builtin cd $HOME
+function _bettercd_cd_to_home(){
+	#Changes the working dir to $HOME
+	_bettercd_save_lwd
+    _bettercd_log "cd to $HOME"
+	builtin cd $HOME
+}
 
-	elif [[ $1 == "-h" ||  $1 == "--help" ]]; then
-		man $HOME/.bettercd/bettercd.man
+function _bettercd_regen_cache(){
+    #Regenerates Bettercd Cache
+    echo "Regenerating bettercd cache"
+    find $HOME -type d 2>/dev/null > $HOME/.bettercd/bettercd.cache
+}
 
-	elif [[ $1 == "-" ||  $1 == "--" ]]; then
-		_bettercd_cd_tp_lwd
+function _bettercd_log(){
+    #Outputs some info if $BETTERCDVERBOSE is 1
+    if [[ $BETTERCDVERBOSE -eq 1 ]]; then
+        echo "$2"
+    fi
+}
 
-	elif [[ $1 == "--cache" ]]; then
-		echo "Regenerating bettercd cache"
-		find $HOME -type d 2>/dev/null > $HOME/.bettercd/bettercd.cache
-
-	elif [[ $1 == "--updateroot" ]]; then
-		if [[ ! -z $2 ]]; then
+function _bettercd_update_root() {
+    if [[ ! -z $2 ]]; then
 			#sed -i 's/export BETTERCDROOT\=.*/export BETTERCDROOT\=\$HOME/g' $HOME/.bettercd/bettercd.source
 			if [[ -d $2 ]]; then
 			 	echo "Updating bettercd root DIR to $2"
@@ -50,20 +51,77 @@ function cd () {
 			 	(crontab -l 2>/dev/null; echo "*/20 * * * * find $BETTERCDROOT -type d 2>/dev/null > $HOME/.bettercd/bettercd.cache") | crontab -
 			else
 				echo "Seems like $2 is not a directory"
-			fi 
+			fi
 		else
 			echo "USAGE:"
 			echo
 			echo "cd --updateroot <DIR>"
 		fi
+}
+
+function _bettercd_show_hist() {
+    NHISTCD=15
+    re='^[0-9]+$'
+    if [[ ! -z $2 ]]; then
+        if [[ "$2" =~ $re ]] ;then
+            NHISTCD=$2
+        fi
+    fi
+
+	#HISTCD=$(tail -"$NHISTCD" "$BETTERCDLWD" | sed "s?$BETTERCDROOT?\\\e\[95m$BETTERCDROOT\\\e\[32m?g")
+	local IT=1
+	while IFS="" read -r p || [ -n "$p" ]
+	do
+		echo "[-$IT] $p"
+		IT=$((IT+1))
+		if  (($IT > $NHISTCD )); then
+			break
+		fi
+	done < $BETTERCDLWD	
+}
+
+function _bettercd_create_expr(){
+    WC="[a-zA-Z\-]*"
+	EXPR="$WC"
+	for T in $@
+	do
+		if [[ $T != "cd" ]]; then
+			#statements
+			EXPR="$EXPR$T$WC"[\\/\\-]"$WC"
+		fi
+	done
+	L=$(echo ${EXPR} | wc -c)-18
+	EXPR=${EXPR:0:$L} 
+	return $EXPR
+}
+
+function cd () {
+	WC="[a-zA-Z\-]*"
+	EXPR="$WC"
+	
+	if [[ -z $1 ]]; then
+		_bettercd_cd_to_home
+
+	elif [[ $1 == "--help" ]]; then
+		man $HOME/.bettercd/bettercd.man
+
+	elif [[ $1 == "-" ||  $1 == "--" ]]; then
+		_bettercd_cd_to_lwd
+
+	elif [[ $1 == "--cache" ]]; then
+		_bettercd_regen_cache
+
+	elif [[ $1 == "--updateroot" ]]; then
+		_bettercd_update_root $@
+
+	elif [[ $1 == "-h" ||  $1 == "--history"  ]]; then
+		_bettercd_show_hist $@
 
 	else # $1 is a DIR or a list of PATERN
 		_bettercd_save_lwd
 	    builtin cd $1 2>/dev/null
 		if [ $? -eq 0 ]; then
-			if [[ $BETTERCDVERBOSE -eq 1 ]]; then
-				echo "cd to $PWD"
-			fi
+			_bettercd_log "cd to $PWD"
 		else
 			if [[ -f $BETTERCDCACHE ]]; then
 				BETTERLIST=0
@@ -72,18 +130,16 @@ function cd () {
 					if [[ $T == "-l" ]]; then
 						BETTERLIST=1
 					else
-						EXPR+="$T$WC\/$WC"
+						EXPR="$EXPR$T$WC"[\\/\\-]"$WC"
 					fi
 				done
-				L=$(echo ${EXPR} | wc -c)-14
+				L=$(echo ${EXPR} | wc -c)-18
 				EXPR=${EXPR:0:$L}
 				if [[ $BETTERLIST -eq 1 ]]; then
 					LISTCD=$(grep -i "$EXPR" "$BETTERCDCACHE" | awk '{ print length($0) " " $0; }' $file | sort  -n | cut -d ' ' -f 2- | head -10 | sed "s?$BETTERCDROOT?\\\e\[95m$BETTERCDROOT\\\e\[32m?g") && echo -e "\e[95mBETTERCDROOT:$BETTERCDROOT\n\n$LISTCD"
 				else
 					DIR=$(grep -i "$EXPR" "$BETTERCDCACHE" | awk '{ print length($0) " " $0; }' $file | sort  -n | cut -d ' ' -f 2- | head -1)
-					if [[ $BETTERCDVERBOSE -eq 1 ]]; then
-						echo "better cd to $DIR"
-					fi
+					_bettercd_log "better cd to $DIR"
 					builtin cd $DIR
 				fi
 			else
@@ -100,20 +156,11 @@ function cdd () {
 	EXPR="$WC"
 	CACHE=$HOME/.bettercd/bettercd.cache
 	if [[ -z $1 ]]; then
-		
-		if [[ $BETTERCDVERBOSE -eq 1 ]]; then
-			echo "cd to $HOME"
-		fi
-		builtin cd $HOME
+		_bettercd_cd_to_home
 
 	elif [[ $1 == "-h" ]]; then
 
 		man $HOME/.bettercd/bettercd.man
-
-	elif [[ $1 == "--cache" ]]; then
-
-		echo "Regenerating bettercd cache"
-		find $HOME -type d 2>/dev/null > $HOME/.bettercd/bettercd.cache
 
 	else
 		if [[ -f $BETTERCDCACHE ]]; then
@@ -123,15 +170,13 @@ function cdd () {
 				if [[ $T == "-l" ]]; then
 					BETTERLIST=1
 				else
-					EXPR+="$T$WC\/$WC"
+					EXPR="$EXPR$T$WC"[\\/\\-]"$WC"
 				fi
 			done
-			L=$(echo ${EXPR} | wc -c)-14
+			L=$(echo ${EXPR} | wc -c)-18
 			EXPR=${EXPR:0:$L} 
 			DIR=$(grep -i $PWD/ $BETTERCDCACHE | grep -i "$EXPR" | awk '{ print length($0) " " $0; }' $file | sort  -n | cut -d ' ' -f 2- | head -1)
-			if [[ $BETTERCDVERBOSE -eq 1 ]]; then
-				echo "better cd to $DIR"
-			fi
+			_bettercd_log "better cd to $DIR"
 			if [[ $BETTERLIST -eq 1 ]]; then
 				LISTCDD=$(grep -i "$PWD/" $BETTERCDCACHE | grep -i "$EXPR" | awk '{ print length($0) " " $0; }' $file | sort  -n | cut -d ' ' -f 2- | head -10 | sed "s?$PWD?\\\e\[95m$PWD\\\e\[32m?g" |  sed "s?$BETTERCDROOT?$BETTERCDROOT\\\e\[96m?g") && echo -e "\e[96mPWD:$PWD\n\e[95mBETTERCDROOT:$BETTERCDROOT\n\n$LISTCDD"
 
@@ -139,9 +184,7 @@ function cdd () {
 				if [[ ! -z $DIR ]]; then
 					builtin cd $DIR
 				else
-					if [[ $BETTERCDVERBOSE -eq 1 ]]; then
-						echo "No directory found to jump under $PWD"
-					fi
+					_bettercd_log "No directory found to jump under $PWD"
 				fi
 			fi
 			
@@ -152,4 +195,32 @@ function cdd () {
 			
 		
 	fi
+}
+
+
+function _bettercd_comp(){
+	local cur cword prev
+	N=0
+	if [[ -z ${words[2]} ]]; then
+		#statements
+		return 0
+	fi
+	if [[ ${N} == 1 ]]; then
+		#statements
+		return 1
+	fi
+    WC="[a-zA-Z\-]*"
+	EXPR="$WC"
+	for T in ${words}
+	do
+		if [[ $T != "cd" ]]; then
+			#statements
+			EXPR="$EXPR$T$WC"[\\/\\-]"$WC"
+		fi
+	done
+	L=$(echo ${EXPR} | wc -c)-18
+	EXPR=${EXPR:0:$L} 
+	LISTCDD=$(grep -i "$EXPR" $BETTERCDCACHE | awk '{ print length($0) " " $0; }' $file | sort  -n | cut -d ' ' -f 2- | head -10 |  sed "s?$BETTERCDROOT??g") && echo -e "\n$LISTCDD\e[8m"
+    _arguments '%'
+    N+=1
 }

@@ -69,7 +69,7 @@ Updates the root directory from which better cd calculates jumps. Default direct
 .RE
 
 .RS 2
---help|-h
+--help
 .RE
 
 .RS 6
@@ -93,6 +93,24 @@ List cache contents. Works similar to cd but it shows a list of possible jump lo
 .RS 6
 Changes the working directory to the previous working directory.
 .RE
+
+.RS 2
+-NUM
+.RE
+
+.RS 6
+Changes the working directory to previous nth directory.
+.RE
+
+
+.RS 2
+-h | -h NUM
+.RE
+
+.RS 6
+List previous working directories (default 15).
+.RE
+
 
 .SH BUGS
 No known bugs. If you find one, please go to https://github.com...
