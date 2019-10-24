@@ -43,12 +43,12 @@ function _bettercd_update_root() {
 			if [[ -d $2 ]]; then
 			 	echo "Updating bettercd root DIR to $2"
 			 	export BETTERCDROOT=$2
-			 	sed -i 's/export BETTERCDROOT\=.*/export BETTERCDROOT\=\$HOME/g' $HOME/.bettercd/bettercd.source
+			 	sed -i "0,/export BETTERCDROOT\=.*/s??export BETTERCDROOT\=$BETTERCDROOT?" $HOME/.bettercd/bettercd.source
 				echo "Updating cache"
 			 	find $BETTERCDROOT -type d 2>/dev/null > $HOME/.bettercd/bettercd.cache
 			 	echo "Updating cronjob"
 			 	crontab -l | grep -v bettercd | crontab -
-			 	(crontab -l 2>/dev/null; echo "*/20 * * * * find $BETTERCDROOT -type d 2>/dev/null > $HOME/.bettercd/bettercd.cache") | crontab -
+			 	echo "*/20 * * * * find $BETTERCDROOT -type d 2>/dev/null > $HOME/.bettercd/bettercd.cache" | crontab -
 			else
 				echo "Seems like $2 is not a directory"
 			fi
@@ -77,7 +77,7 @@ function _bettercd_show_hist() {
 		if  (($IT > $NHISTCD )); then
 			break
 		fi
-	done < $BETTERCDLWD	
+	done < $BETTERCDLWD
 }
 
 function _bettercd_create_expr(){
@@ -91,14 +91,14 @@ function _bettercd_create_expr(){
 		fi
 	done
 	L=$(echo ${EXPR} | wc -c)-18
-	EXPR=${EXPR:0:$L} 
+	EXPR=${EXPR:0:$L}
 	return $EXPR
 }
 
-function cd () {
+function c () {
 	WC="[a-zA-Z\-]*"
 	EXPR="$WC"
-	
+
 	if [[ -z $1 ]]; then
 		_bettercd_cd_to_home
 
@@ -146,12 +146,12 @@ function cd () {
 				echo "bettercd cache not found"
 				echo "please run $HOME/.bettercd/install.sh"
 			fi
-			
+
 		fi
 	fi
 }
 
-function cdd () {
+function cc () {
 	WC="[a-zA-Z\-]*"
 	EXPR="$WC"
 	CACHE=$HOME/.bettercd/bettercd.cache
@@ -174,7 +174,7 @@ function cdd () {
 				fi
 			done
 			L=$(echo ${EXPR} | wc -c)-18
-			EXPR=${EXPR:0:$L} 
+			EXPR=${EXPR:0:$L}
 			DIR=$(grep -i $PWD/ $BETTERCDCACHE | grep -i "$EXPR" | awk '{ print length($0) " " $0; }' $file | sort  -n | cut -d ' ' -f 2- | head -1)
 			_bettercd_log "better cd to $DIR"
 			if [[ $BETTERLIST -eq 1 ]]; then
@@ -187,13 +187,13 @@ function cdd () {
 					_bettercd_log "No directory found to jump under $PWD"
 				fi
 			fi
-			
+
 		else
 			echo "bettercd cache not found"
 			echo "please run $HOME/.bettercd/install.sh"
 		fi
-			
-		
+
+
 	fi
 }
 
@@ -219,7 +219,7 @@ function _bettercd_comp(){
 		fi
 	done
 	L=$(echo ${EXPR} | wc -c)-18
-	EXPR=${EXPR:0:$L} 
+	EXPR=${EXPR:0:$L}
 	LISTCDD=$(grep -i "$EXPR" $BETTERCDCACHE | awk '{ print length($0) " " $0; }' $file | sort  -n | cut -d ' ' -f 2- | head -10 |  sed "s?$BETTERCDROOT??g") && echo -e "\n$LISTCDD\e[8m"
     _arguments '%'
     N+=1
